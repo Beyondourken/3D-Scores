@@ -8,7 +8,7 @@ public class TabManager : MonoBehaviour
 
 void Start ()
     {
-       numberOfTargets = AppManager.instance.GetNumberOfTargets();
+       numberOfTargets = CompetitionManager.instance.GetNumberOfTargets();
        for (int i = numberOfTargets; i < 6; i++)
        {
             rows[i].SetActive(false);
