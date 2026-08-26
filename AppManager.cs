@@ -5,25 +5,21 @@ using UnityEngine.UI;
 using System;
 using TMPro;
 using System.Collections;
+using UnityEngine.Rendering.LookDev;
 
 public class AppManager : MonoBehaviour
 {
 
-// [SerializeField] TextMeshProUGUI day;
-// [SerializeField] TextMeshProUGUI month;
-// [SerializeField] TextMeshProUGUI year;
-[SerializeField] int dd;
-[SerializeField] int mm;
-[SerializeField] int yyyy;
-// [SerializeField] Slider slider;
-// [SerializeField] TextMeshProUGUI NOTText;
-// int NoOfTargets;
+[SerializeField] RectTransform contents;
+ [SerializeField] GameObject FileNames;
+
+
 List<Text> names;
 
 
 
  public static AppManager instance;
-//public CompetitionManager competitionManager{get; set;}
+
  private void Awake()
     {
         instance = this;
@@ -32,37 +28,35 @@ List<Text> names;
 
     public void Start()
     {
-        dd = DateTime.Now.Day;
-        mm = DateTime.Now.Month;
-        yyyy = DateTime.Now.Year;
-        // day.text = DateTime.Now.Day.ToString();
-        // month.text = DateTime.Now.Month.ToString();
-        // year.text = DateTime.Now.Year.ToString();
-        //StartCoroutine(UpdateDate(day,dd.ToString()));
+     
+    
+       foreach (Transform child in contents) {
+			GameObject.Destroy(child.gameObject);
+		}
+        
+      
+      List<string> files = SaveSystem.ListFiles();
+        GameObject newFile;
+    foreach (var item in files)
+    {
+  
+            newFile = Instantiate (FileNames) as GameObject;
+            FileDisplay localFile = newFile.GetComponent <FileDisplay> ();
+            localFile.fileText.text = item;
+          
+            newFile.transform.SetParent (contents,false);
 
     }
+      
+    }
 
-// void Update()
-//     {
-//         NOTText.text = slider.value.ToString();
-//         NoOfTargets = (int)slider.value;
-//     }
-//    IEnumerator UpdateDate(TextMeshProUGUI obj, string value)
-//         {
-//             obj.gameObject.SetActive(false);
-//             obj.text = DateTime.Now.Day.ToString();
-//             yield return new WaitForEndOfFrame();
-//             obj.gameObject.SetActive(true);
-//         }
+
     public void LoadScene(int scene)
     {
         SceneManager.LoadScene(scene);
-        // SceneManager.LoadScene("Main Scene", LoadSceneMode.Single);
+    
     }
-    // public int GetNumberOfTargets()
-    // {
-    //     return NoOfTargets;
-    // }
+  
   
     public void SaveScores()
     {
