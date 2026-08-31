@@ -16,8 +16,17 @@ public class ScoreSheetManager : MonoBehaviour
  int numberOfTargets = 0;
  int numberOfCompetitors = 0;
  List<string> competitors;
- int currentRound = 1;
+ public int currentRound = 1;
+ public int currentCompetitor = 0;
+ public string selectedCompetitor;
+public static ScoreSheetManager instance;
 
+private void Awake()
+    {
+        instance = this;
+       
+        
+    } 
 void Start ()
     {
         roundPrefab = Resources.Load<GameObject>("RoundPrefab");
@@ -35,7 +44,7 @@ void Start ()
         ClearScoreSheet(contents);
         currentRound ++;
         if(currentRound > numberOfTargets) {
-            CompetitionManager.instance.LoadScene(3) ;
+            CompetitionManager.instance.LoadScene(3) ; 
         } else{
         roundNumber.text = currentRound.ToString();
         GenerateScoreSheet();
@@ -45,19 +54,29 @@ void Start ()
     public void PreviousRound()
     {
         StoreScores(contents);
+        ClearScoreSheet(contents);
+        currentRound --;
+        if(currentRound < 1) {
+            CompetitionManager.instance.LoadScene(1) ; 
+        } else{
+        roundNumber.text = currentRound.ToString();
+        GenerateScoreSheet();
+        }
     }
+
     void StoreScores(Transform transform)
     {
-        int score;
+        int score = 0;
         
         foreach (Transform child in transform) {
 			RoundManager roundPerson = child.GetComponent <RoundManager> ();
              
             int.TryParse(roundPerson.scoreText.text, out score);
             roundScores.Add(score);
-         
+        
 		}
-		CompetitionManager.instance.SaveScores(roundScores);
+     
+		CompetitionManager.instance.SaveRoundScores(roundScores, currentRound);
         
     }
     void ClearScoreSheet(Transform transform)
@@ -65,22 +84,36 @@ void Start ()
        foreach (Transform child in transform) {
 			GameObject.Destroy(child.gameObject);
 		}
-        
+       
         }
 
     void GenerateScoreSheet()
     {
         numberOfCompetitors = CompetitionManager.instance.GetNumberOfCompetitors();
         GameObject newPerson;
-     
+        currentCompetitor = 0;
        
         foreach (var person in competitors) {
             newPerson = Instantiate (roundPrefab) as GameObject;
             RoundManager roundPerson = newPerson.GetComponent <RoundManager> ();
             roundPerson.nameText.text = person;
+             if (AppManager.instance.SelectedFile != "None")
+            {
+                roundPerson.scoreText.text = CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound).ToString();
+                roundPerson.currentRoundScore = CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound);
+                roundPerson.DisplayImage(AppManager.instance.GetHitValueIndex(CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound)));
+            }
           
             newPerson.transform.SetParent (contents,false);
+            if (currentCompetitor < numberOfCompetitors-1) {currentCompetitor ++;}
+            
 
         }
+    }
+
+    public void SetCompetitor(string name)
+    {
+        selectedCompetitor = name;
+        currentCompetitor = competitors.IndexOf(name);
     }
 }

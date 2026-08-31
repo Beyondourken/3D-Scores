@@ -17,11 +17,16 @@ public class SaveSystem
 
     public static string SaveFilename()
     {
-       
+        string saveFile = "";
+       if(AppManager.instance.SelectedFile == "None") {
        string today = DateTime.Now.Day.ToString() +  "-"  + DateTime.Now.Month.ToString() + "-"  + DateTime.Now.Year.ToString();
        
       
-        string saveFile = UnityEngine.Application.persistentDataPath + "/" + today + ".save";
+        saveFile = UnityEngine.Application.persistentDataPath + "/" + today + ".save";
+       } else
+        {
+            saveFile = UnityEngine.Application.persistentDataPath + "/" + AppManager.instance.SelectedFile + ".save";
+        }
         return saveFile;
     }
 
@@ -34,8 +39,8 @@ public class SaveSystem
     private static void HandleSaveData(){
   
       
-       CompetitionManager.instance.Save(ref saveData.competitionSaveData);
-
+      
+    CompetitionManager.instance.Save(ref saveData.competitionSaveData);
 
     }
     public static List<string> ListFiles()

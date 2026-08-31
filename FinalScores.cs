@@ -13,7 +13,11 @@ public class FinalScores : MonoBehaviour
      int numberOfCompetitors = 0;
     List<string> competitors;
     List<int> roundScores;
-   // private Dictionary<string,int> finalScores =  new Dictionary<string, int>(); 
+  
+
+
+
+  
     List<finalScores> PlayerScores;
     finalScores[] sortedScores;
 
@@ -35,23 +39,22 @@ public class FinalScores : MonoBehaviour
         numberOfTargets = CompetitionManager.instance.GetNumberOfTargets();  
         numberOfCompetitors = CompetitionManager.instance.GetNumberOfCompetitors(); 
         competitors  = CompetitionManager.instance.GetCompetitors(); 
-        roundScores = CompetitionManager.instance.GetScores();
+       
      }
     private void CalculateFinalScores()
     {
-        int runningTotal = 0;
+        int total = 0;
        
         for (int i = 0; i < numberOfCompetitors; i++)
         {
-            for (int j = i; j < roundScores.Count; j+=numberOfCompetitors)
-            {
-               runningTotal += roundScores[j];
-         
-            }
-             PlayerScores.Add(new finalScores() { Competitor = competitors[i], Score = runningTotal });
+             
+          
+            total = CompetitionManager.instance.GetCompetitorTotalScore(i); 
+             PlayerScores.Add(new finalScores() { Competitor = competitors[i], Score = total });
+   
          
            
-            runningTotal = 0;
+            total = 0;
         }
     }
         private void SortFinalScores()
@@ -81,8 +84,13 @@ public class FinalScores : MonoBehaviour
             newScoreDisplay.transform.SetParent (contents,false);
 
         }
+
+       
     }
-  
+   public void LoadScene()
+        {
+            AppManager.instance.LoadScene(1);
+        }
 
    
 }

@@ -5,17 +5,24 @@ using TMPro;
 using System.Collections.Generic;
 using Unity.Android.Gradle.Manifest;
 using System.Linq;
+using NUnit.Framework;
+using static CompetitionSaveData;
+using UnityEngine.SocialPlatforms.Impl;
+using UnityEditor.Rendering;
 public class CompetitionManager : MonoBehaviour
 {
    [SerializeField] TextMeshProUGUI NOTText;
 
     [SerializeField] Slider slider;
     [SerializeField] TextMeshProUGUI DateText;
-    [SerializeField] List<string> Competitors;
+
+  
+ 
      [SerializeField] List<TMP_InputField> Names;
+     [SerializeField] CompetitionSaveData data;
     string competitionDate;
     int NoOfTargets = 18;
-    List<int> RoundScores;
+
 
     public static CompetitionManager instance;
 
@@ -23,13 +30,38 @@ public class CompetitionManager : MonoBehaviour
     {
         instance = this;
         DontDestroyOnLoad(gameObject);
-        DateText.text= DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();  //TODO load option
+        
     } 
+    void Start()
+     {
+        
+         if (AppManager.instance.SelectedFile == "None") {
+           
+            DateText.text= DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();     
+            data.competitorList = new List<CompetitorList>();
+        } else
+        {
+            AppManager.instance.LoadScores();
+            NoOfTargets = data.Targets;
+            slider.value = (float)NoOfTargets;
+            NOTText.text = data.Targets.ToString();
+          
+            DateText.text = data.CompetitionDate;
+            for (int i = 0;i < data.competitorList.Count;i++)
+            {
+                TMP_InputField inputField = Names[i];
+               inputField.text  = data.competitorList[i].CompetitorName;
+            }
+
+        }
+    }
+  
   public void UpdateSlider()
     {
         NOTText.text = slider.value.ToString();
         
         NoOfTargets = (int)slider.value;
+    
     }
       public int GetNumberOfTargets()
     {
@@ -39,19 +71,47 @@ public class CompetitionManager : MonoBehaviour
        public int GetNumberOfCompetitors()
     {
       
-       return Competitors.Count();
+      
+       return data.competitorList.Count();
        
+
+
     }
         public List<string> GetCompetitors()
     {
-      
-       return Competitors;
+        List<string> names = new List<string>();
+       
+       foreach (var item in  data.competitorList)
+        {
+            names.Add(item.CompetitorName);
+           
+        }
+        
+       return names;
+       
+     } 
+     public int GetCompetitorScore(int index,int roundIndex)
+    {
+   
+       int score = data.competitorList[index].scores[roundIndex-1];
+  
+        
+       return score;
        
     } 
-     public List<int> GetScores()
+
+     public int GetCompetitorTotalScore(int index)
     {
       
-       return RoundScores;
+       int score = 0;
+    
+      for (int i = 0; i < data.competitorList[index].scores.Count; i++)
+      {
+        
+        score += data.competitorList[index].scores[i];
+      }
+        
+       return score;
        
     } 
     public string GetDate()
@@ -67,76 +127,97 @@ public class CompetitionManager : MonoBehaviour
 
     public void StoreCompetitors()
     {
+         if (AppManager.instance.SelectedFile != "None") { return;}
+
+        //TODO check if competitors have been added (allow deleted?) to existing file
         competitionDate = DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();
+        data.Targets = NoOfTargets;
+        data.CompetitionDate = competitionDate;
+        List<int> scoresList = new List<int>();
+        for (int i = 0; i < NoOfTargets  ;i++)
+        {
+            scoresList.Add(1);
+        }
         string comp;
-        foreach (var item in Names)
+      
+        for (int i = 0; i < Names.Count; i++)
+        
         {
            
-             comp = item.GetComponentInChildren<TextMeshProUGUI>().text;
+             comp = Names[i].GetComponentInChildren<TextMeshProUGUI>().text;
             if( comp.Length <= 1 )
             {
                 
             } else {
-                Competitors.Add(comp);
+                CompetitorList newCompetitor = new CompetitorList();
+
+                newCompetitor.scores =  new List<int>(scoresList);
+                newCompetitor.CompetitorName = comp;
+                
+               
+                data.competitorList.Add(newCompetitor);
                 
             }
-           
+        
         }
     
      
       
     }
 
-    public void Save(ref CompetitionSaveData data)
+    public void Save(ref CompetitionSaveData saveData)
     {
-        data.CompetitionDate = competitionDate;
-        data.Targets = NoOfTargets;
-        data.CompetitorList = Competitors;
-        data.RoundScores = RoundScores;
+        saveData = data;
+  
       
     }
-    public void Load(CompetitionSaveData data)
+    public void Load(CompetitionSaveData loadData)
     {
-        NoOfTargets = data.Targets;
-        Competitors = data.CompetitorList;
-        RoundScores = data.RoundScores;
+        NoOfTargets = loadData.Targets;
+        competitionDate = loadData.CompetitionDate;
+     
+       data = loadData;
+      
+
+       
+        
+
+
+        
     }
-    public void SaveScores(List<int> scores)
+    public void SaveRoundScores(List<int> scores, int roundNumber)
     {
-        RoundScores  = scores;
+     
+        for (int i = 0; i < scores.Count; i++)
+        {
+           
+            data.competitorList[i].scores[roundNumber-1] = scores[i];
+        }
+        scores.Clear();
         AppManager.instance.SaveScores(); 
     }
 }
 
+
+
+
+
+
 [System.Serializable]
-public struct CompetitionSaveData
+public class CompetitionSaveData
 {
     public string CompetitionDate;
     public int Targets;
-    public List<string> CompetitorList;
-    public List<int> RoundScores;
+    public List<CompetitorList> competitorList;
+
+
+ [System.Serializable]
+ public struct CompetitorList
+ {
+     public string CompetitorName;
+     public List<int> scores;
+ }
+
+
+
 }
-
-
-// [System.Serializable]
-// public class Container
-// {
-//     public string name;
-//     public List<Cell> map;
-// }
-
-// [System.Serializable]
-// public class Cell
-// {
-//     public string groundTexture;
-//     public string cellType;
-//     public Vector2 masterField;
-//     public List<WorldObject> worldObjects;
-// }
-
-// [System.Serializable]
-// public class WorldObject
-// {
-//     public string worldObjectType;
-//     public string rotation;
-// }

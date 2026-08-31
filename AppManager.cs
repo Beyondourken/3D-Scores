@@ -13,8 +13,10 @@ public class AppManager : MonoBehaviour
 [SerializeField] RectTransform contents;
  [SerializeField] GameObject FileNames;
 
+ [SerializeField] public List<int> HitValues = new List<int>() {20,18,16,14,12,10,0};
+ public string SelectedFile;
 
-List<Text> names;
+
 
 
 
@@ -27,8 +29,8 @@ List<Text> names;
     }
 
     public void Start()
-    {
-     
+    { 
+     SelectedFile = "None";
     
        foreach (Transform child in contents) {
 			GameObject.Destroy(child.gameObject);
@@ -50,7 +52,18 @@ List<Text> names;
       
     }
 
+    public int GetHitValueIndex(int hitValue)
+    {
+        return HitValues.IndexOf (hitValue);
+    }
 
+    public void SelectFile(string fileName)
+    {
+       
+        SelectedFile = fileName;
+   
+
+    }
     public void LoadScene(int scene)
     {
         SceneManager.LoadScene(scene);
@@ -69,3 +82,5 @@ List<Text> names;
         SaveSystem.Load();
     }
 }
+
+
