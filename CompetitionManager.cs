@@ -3,12 +3,13 @@ using UnityEngine.UI;
 using System;
 using TMPro;
 using System.Collections.Generic;
-using Unity.Android.Gradle.Manifest;
+
 using System.Linq;
-using NUnit.Framework;
+
 using static CompetitionSaveData;
-using UnityEngine.SocialPlatforms.Impl;
-using UnityEditor.Rendering;
+using JetBrains.Annotations;
+
+
 public class CompetitionManager : MonoBehaviour
 {
    [SerializeField] TextMeshProUGUI NOTText;
@@ -16,12 +17,17 @@ public class CompetitionManager : MonoBehaviour
     [SerializeField] Slider slider;
     [SerializeField] TextMeshProUGUI DateText;
 
+    [SerializeField] Transform contents;
   
- 
-     [SerializeField] List<TMP_InputField> Names;
-     [SerializeField] CompetitionSaveData data;
+    [SerializeField] GameObject inputPrefab;
+    [SerializeField] List<TMP_InputField> Names;
+    [SerializeField] CompetitionSaveData data;
+     public int currentCompetitor = 0;
+    public string selectedCompetitor;
     string competitionDate;
     int NoOfTargets = 18;
+
+
 
 
     public static CompetitionManager instance;
@@ -35,8 +41,13 @@ public class CompetitionManager : MonoBehaviour
     void Start()
      {
         
+        
+
+
          if (AppManager.instance.SelectedFile == "None") {
-           
+         //  ClearCompetitorInput(contents); 
+            GenerateEmptyInputField();
+
             DateText.text= DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();     
             data.competitorList = new List<CompetitorList>();
         } else
@@ -49,8 +60,14 @@ public class CompetitionManager : MonoBehaviour
             DateText.text = data.CompetitionDate;
             for (int i = 0;i < data.competitorList.Count;i++)
             {
-                TMP_InputField inputField = Names[i];
+                GameObject newPerson;
+                newPerson = Instantiate (inputPrefab) as GameObject;
+                TMP_InputField inputField = newPerson.GetComponent<TMP_InputField>();
+               
+               // TMP_InputField inputField = Names[i];
                inputField.text  = data.competitorList[i].CompetitorName;
+               Names.Add(inputField);
+               newPerson.transform.SetParent (contents,false);
             }
 
         }
@@ -92,7 +109,7 @@ public class CompetitionManager : MonoBehaviour
      } 
      public int GetCompetitorScore(int index,int roundIndex)
     {
-   
+      
        int score = data.competitorList[index].scores[roundIndex-1];
   
         
@@ -119,17 +136,50 @@ public class CompetitionManager : MonoBehaviour
         return competitionDate;
     }
   
-
     public void LoadScene(int scene)
     {
         AppManager.instance.LoadScene(scene);
     }
 
+    void ClearCompetitorInput(Transform transform)
+    {
+       foreach (Transform child in transform) {
+			GameObject.Destroy(child.gameObject);
+		}
+        for (int i = 0; i < 7; i++)
+        {
+            GenerateEmptyInputField();
+        }
+        }
+
+    public void GenerateEmptyInputField()
+    {
+         GameObject newPerson;
+        newPerson = Instantiate (inputPrefab) as GameObject;
+  
+
+        newPerson.transform.SetParent (contents,false);
+    }
+
+    public  void GenerateInputField(TMP_InputField input)
+    { 
+        Names.Add(input);
+        GenerateEmptyInputField();
+  
+
+        }
+        
+ 
+   
+
+
     public void StoreCompetitors()
     {
-         if (AppManager.instance.SelectedFile != "None") { return;}
+         if (AppManager.instance.SelectedFile != "None") {
+             return;
 
-        //TODO check if competitors have been added (allow deleted?) to existing file
+        //TODO check if competitors have been added, edited, (allow deleted?) to existing file
+         } else {
         competitionDate = DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();
         data.Targets = NoOfTargets;
         data.CompetitionDate = competitionDate;
@@ -139,11 +189,11 @@ public class CompetitionManager : MonoBehaviour
             scoresList.Add(1);
         }
         string comp;
-      
+   
         for (int i = 0; i < Names.Count; i++)
         
         {
-           
+         
              comp = Names[i].GetComponentInChildren<TextMeshProUGUI>().text;
             if( comp.Length <= 1 )
             {
@@ -160,10 +210,40 @@ public class CompetitionManager : MonoBehaviour
             }
         
         }
+         }
+        
     
      
       
     }
+
+    // public void NameEdited(string newName)
+    // {
+        
+    //     // string comp;
+    //     // for (int i = 0; i < Names.Count-1; i++)
+        
+    //     // {
+         
+    //     //      comp = Names[i].GetComponentInChildren<TextMeshProUGUI>().text;
+    //     //      print("comp names i " + comp + " = Newname " + newName + " i " + i);
+            
+                
+    //     //       //  if(comp == newName) {
+    //     //    //      if(   String.Equals(comp,newName)) {
+    //     //     print("yay ");
+    //     //        CompetitorList editedCompetitor = new CompetitorList();
+               
+    //     //      //   editedCompetitor.CompetitorName = newName;
+    //     //      editedCompetitor.CompetitorName  = "name Changed";
+    //     //         print(" edited name " +editedCompetitor.CompetitorName );
+    //     //         data.competitorList[i] = editedCompetitor;
+    //     //     //    }
+                
+            
+        
+    //     // }
+    // }
 
     public void Save(ref CompetitionSaveData saveData)
     {
@@ -196,6 +276,11 @@ public class CompetitionManager : MonoBehaviour
         scores.Clear();
         AppManager.instance.SaveScores(); 
     }
+
+      public void LoadCompetitorScene()
+    {
+        AppManager.instance.LoadSceneAdditively();
+    }
 }
 
 
@@ -209,6 +294,7 @@ public class CompetitionSaveData
     public string CompetitionDate;
     public int Targets;
     public List<CompetitorList> competitorList;
+
 
 
  [System.Serializable]

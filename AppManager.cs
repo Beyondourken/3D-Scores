@@ -2,18 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System;
-using TMPro;
-using System.Collections;
-using UnityEngine.Rendering.LookDev;
+
 
 public class AppManager : MonoBehaviour
 {
 
 [SerializeField] RectTransform contents;
  [SerializeField] GameObject FileNames;
+ [SerializeField] Button loadButton;
 
- [SerializeField] public List<int> HitValues = new List<int>() {20,18,16,14,12,10,0};
+ [SerializeField] public List<int> HitValues = new List<int>() {20,18,16,14,12,10,0,1};
  public string SelectedFile;
 
 
@@ -52,8 +50,8 @@ public class AppManager : MonoBehaviour
       
     }
 
-    public int GetHitValueIndex(int hitValue)
-    {
+    public int GetHitValueIndex(int hitValue) {
+  
         return HitValues.IndexOf (hitValue);
     }
 
@@ -61,6 +59,7 @@ public class AppManager : MonoBehaviour
     {
        
         SelectedFile = fileName;
+        loadButton.interactable = true;
    
 
     }
@@ -68,6 +67,12 @@ public class AppManager : MonoBehaviour
     {
         SceneManager.LoadScene(scene);
     
+    }
+
+    public void LoadSceneAdditively()
+    {
+        SceneManager.LoadScene("Competitor Scene", LoadSceneMode.Additive);
+        
     }
   
   

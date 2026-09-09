@@ -1,9 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
-using Microsoft.Unity.VisualStudio.Editor;
-using JetBrains.Annotations;
-using UnityEngine.UI;
+
 
 public class RoundManager : MonoBehaviour
 {
@@ -25,7 +23,7 @@ public class RoundManager : MonoBehaviour
 
     public void LoadCompetitorScene()
     {
-        CompetitionManager.instance.LoadScene(4);
+        AppManager.instance.LoadSceneAdditively();
     }
   
 
@@ -52,7 +50,9 @@ public class RoundManager : MonoBehaviour
             item.SetActive(false);
 
         }
+        if (index < ImageList.Count) {
         ImageList[index].SetActive(true);
+        }
     }
 
     public void SelectedCompetitor()

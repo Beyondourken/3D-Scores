@@ -9,7 +9,7 @@ public class CompetitorManager : MonoBehaviour
      [SerializeField] GameObject resultsPrefab;
       int numberOfTargets = 0;
       List<string> results;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+  
     void Start()
     {
         resultsPrefab = Resources.Load<GameObject>("CompetitorResults");
@@ -19,7 +19,8 @@ public class CompetitorManager : MonoBehaviour
             "Second Kill","Second Wound",
             "Third Kill","Third Wound",
             "All Away","Not Recorded"};                                                       
-        competitorName.text = ScoreSheetManager.instance.selectedCompetitor;
+       // competitorName.text = ScoreSheetManager.instance.selectedCompetitor;
+       competitorName.text = CompetitionManager.instance.selectedCompetitor;
         GameObject newRound;
         int hitIndex = 0;
         for (int i = 0; i < numberOfTargets; i++)
@@ -29,17 +30,23 @@ public class CompetitorManager : MonoBehaviour
           int round = i;
           round++;
             roundDisplay.roundText.text = (round).ToString();
-            print (ScoreSheetManager.instance.currentCompetitor + " " + i);
-            print(CompetitionManager.instance.GetCompetitorScore
-                                                        (ScoreSheetManager.instance.currentCompetitor,i));
-           //hitIndex = AppManager.instance.GetHitValueIndex(CompetitionManager.instance.GetCompetitorScore
-          //                                              (ScoreSheetManager.instance.currentCompetitor,i));
+           
+       
+           hitIndex = AppManager.instance.GetHitValueIndex(CompetitionManager.instance.GetCompetitorScore
+                                                        // (ScoreSheetManager.instance.currentCompetitor,round));
+                                                         (CompetitionManager.instance.currentCompetitor,round));
+        if(hitIndex <0) {hitIndex = 7;}        // catches unrecorded results
             roundDisplay.hitText.text = results[hitIndex];
           
             newRound.transform.SetParent (contents,false);
            
               
         }
+    }
+
+    public void PreviousScreen()
+    {
+        Destroy(this.gameObject);
     }
 
  

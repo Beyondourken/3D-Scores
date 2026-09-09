@@ -1,8 +1,7 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
+
 using System.Collections.Generic;
-using System.Collections;
-using UnityEngine.UI;
+
 using TMPro;
 
 
@@ -113,7 +112,10 @@ void Start ()
 
     public void SetCompetitor(string name)
     {
-        selectedCompetitor = name;
-        currentCompetitor = competitors.IndexOf(name);
+        // selectedCompetitor = name;
+        // currentCompetitor = competitors.IndexOf(name);
+
+        CompetitionManager.instance.selectedCompetitor = name;
+        CompetitionManager.instance.currentCompetitor = competitors.IndexOf(name);
     }
 }

@@ -1,4 +1,4 @@
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -20,7 +20,14 @@ public class FinalScores : MonoBehaviour
   
     List<finalScores> PlayerScores;
     finalScores[] sortedScores;
+public static FinalScores instance;
 
+   private void Awake()
+    {
+        instance = this;
+       
+        
+    } 
     void Start()
     {
         finalScoreDisplay = Resources.Load<GameObject>("FinalScoreDisplay");
@@ -91,7 +98,15 @@ public class FinalScores : MonoBehaviour
         {
             AppManager.instance.LoadScene(1);
         }
-
+    public void LoadCompetitorScene(string name)
+    {
+     
+    
+        CompetitionManager.instance.selectedCompetitor = name;
+        CompetitionManager.instance.currentCompetitor = competitors.IndexOf(name);
+    
+        AppManager.instance.LoadSceneAdditively();
+    }
    
 }
 public struct finalScores {
