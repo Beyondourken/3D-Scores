@@ -175,11 +175,14 @@ public class CompetitionManager : MonoBehaviour
 
     public void StoreCompetitors()
     {
-         if (AppManager.instance.SelectedFile != "None") {
-             return;
+          if (AppManager.instance.SelectedFile != "None")
+        {
+         return;
+        
 
-        //TODO check if competitors have been added, edited, (allow deleted?) to existing file
          } else {
+           string today = DateTime.Now.Day.ToString() +  "-"  + DateTime.Now.Month.ToString() + "-"  + DateTime.Now.Year.ToString();
+            AppManager.instance.SelectedFile = today;   
         competitionDate = DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();
         data.Targets = NoOfTargets;
         data.CompetitionDate = competitionDate;
@@ -210,7 +213,7 @@ public class CompetitionManager : MonoBehaviour
             }
         
         }
-         }
+       }
         
     
      

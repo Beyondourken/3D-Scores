@@ -9,4 +9,5 @@ public class FileDisplay : MonoBehaviour
       {
             AppManager.instance.SelectFile(fileName.text);
       }  
+      
 }

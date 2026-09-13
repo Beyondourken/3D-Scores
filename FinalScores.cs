@@ -86,7 +86,11 @@ public static FinalScores instance;
             newScoreDisplay = Instantiate (finalScoreDisplay) as GameObject;
             FinalScoreDisplay competitorScore = newScoreDisplay.GetComponent <FinalScoreDisplay> ();
             competitorScore.nameText.text = person.Competitor;
-            competitorScore.scoreText.text = person.Score.ToString();
+            if(person.Score < 10)
+            {competitorScore.scoreText.text = "0";
+                
+            }else {
+            competitorScore.scoreText.text = person.Score.ToString();}
           
             newScoreDisplay.transform.SetParent (contents,false);
 

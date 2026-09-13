@@ -10,6 +10,7 @@ public class AppManager : MonoBehaviour
 [SerializeField] RectTransform contents;
  [SerializeField] GameObject FileNames;
  [SerializeField] Button loadButton;
+ [SerializeField] public GameObject cover;
 
  [SerializeField] public List<int> HitValues = new List<int>() {20,18,16,14,12,10,0,1};
  public string SelectedFile;
@@ -59,8 +60,10 @@ public class AppManager : MonoBehaviour
     {
        
         SelectedFile = fileName;
-        loadButton.interactable = true;
-   
+        if(loadButton != null) {
+        loadButton.interactable = true;}
+        if(cover != null) {
+        cover.SetActive(false);}
 
     }
     public void LoadScene(int scene)
@@ -86,6 +89,18 @@ public class AppManager : MonoBehaviour
     {
         SaveSystem.Load();
     }
+
+    public void DeleteFile()
+    {
+        SaveSystem.Delete(SelectedFile);
+        SelectedFile = "None";
+    }
+    //  public void ArchiveFile()
+    // {
+    //     SaveSystem.SaveArchive(SelectedFile);
+    //     SaveSystem.Delete(SelectedFile);
+    //     SelectedFile = "None";
+    // }
 }
 
 

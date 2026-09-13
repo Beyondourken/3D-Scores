@@ -99,6 +99,7 @@ void Start ()
              if (AppManager.instance.SelectedFile != "None")
             {
                 roundPerson.scoreText.text = CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound).ToString();
+                if(CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound) < 10) {roundPerson.scoreText.text = "0";}
                 roundPerson.currentRoundScore = CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound);
                 roundPerson.DisplayImage(AppManager.instance.GetHitValueIndex(CompetitionManager.instance.GetCompetitorScore(currentCompetitor,currentRound)));
             }
