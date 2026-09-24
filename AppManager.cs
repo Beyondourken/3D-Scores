@@ -23,8 +23,15 @@ public class AppManager : MonoBehaviour
 
  private void Awake()
     {
+        if (instance != null && instance != this) 
+    { 
+        Destroy(this); 
+    } 
+ 
+   
+	
         instance = this;
-        DontDestroyOnLoad(gameObject);
+       // DontDestroyOnLoad(gameObject);
     }
 
     public void Start()

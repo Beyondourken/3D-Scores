@@ -12,7 +12,8 @@ public class FileManager : MonoBehaviour
     [SerializeField] GameObject modalPanel;
     [SerializeField] TextMeshProUGUI fileName;
     [SerializeField] TextMeshProUGUI confirmMessage;
-  
+    [SerializeField] Slider slider;
+    [SerializeField] TextMeshProUGUI NOTCompetitors;
     void Start()
     {
         modalPanel.SetActive(false);
@@ -38,12 +39,19 @@ public class FileManager : MonoBehaviour
 
     }
     }
-
+    public void UpdateSlider()
+    {
+        NOTCompetitors.text = slider.value.ToString();
+        
+        CompetitionManager.instance.UpdateMaxCompetitors((int)slider.value);
+    
+    }
     public void Delete() {
 
    
         fileName.text = AppManager.instance.SelectedFile;
         modalPanel.SetActive(true);
+        fileButton.interactable  = false;
      
     }
 

@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using static CompetitionSaveData;
-using JetBrains.Annotations;
-using Unity.VisualScripting;
+
+
 
 
 public class CompetitionManager : MonoBehaviour
@@ -30,27 +30,31 @@ public class CompetitionManager : MonoBehaviour
     string competitionDate;
     int NoOfTargets = 18;
     bool nameEdited = false;
-
-
+    bool confirmingTargets = false;
+    int maxCompetitors = 20;
+  //  string lastName = "";
 
 
     public static CompetitionManager instance;
 
  private void Awake()
     {
+      
+	
+    
         instance = this;
-        DontDestroyOnLoad(gameObject);
+    //    DontDestroyOnLoad(gameObject);
         
     } 
+    
     void Start()
      {
-        
         
 
 
          if (AppManager.instance.SelectedFile == "None") {
          
-            GenerateEmptyInputField();
+             GenerateEmptyInputField();
 
             DateText.text= DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();     
             data.competitorList = new List<CompetitorList>();
@@ -75,6 +79,9 @@ public class CompetitionManager : MonoBehaviour
             }
 
         }
+      
+     
+        GenerateEmptyInputField();
     }
   
   public void UpdateSlider()
@@ -83,6 +90,10 @@ public class CompetitionManager : MonoBehaviour
         
         NoOfTargets = (int)slider.value;
     
+    }
+    public void UpdateMaxCompetitors(int value)
+    {
+        maxCompetitors = value;
     }
       public int GetNumberOfTargets()
     {
@@ -115,7 +126,7 @@ public class CompetitionManager : MonoBehaviour
     {
       
        int score = data.competitorList[index].scores[roundIndex-1];
-  
+        if(score < 5) score = 0;
         
        return score;
        
@@ -128,8 +139,9 @@ public class CompetitionManager : MonoBehaviour
     
       for (int i = 0; i < data.competitorList[index].scores.Count; i++)
       {
-        
+        if(data.competitorList[index].scores[i] > 5) {
         score += data.competitorList[index].scores[i];
+        }
       }
         
        return score;
@@ -142,19 +154,29 @@ public class CompetitionManager : MonoBehaviour
   
     public void LoadScene(int scene)
     {
+        CheckForDuplicates();
         AppManager.instance.LoadScene(scene);
     }
 
-    void ClearCompetitorInput(Transform transform)
+    void CheckForDuplicates()
     {
-       foreach (Transform child in transform) {
-			GameObject.Destroy(child.gameObject);
-		}
-        for (int i = 0; i < 7; i++)
+        //work around for Android duplicating records
+      
+        for (int i = 0; i < data.competitorList.Count; i++)
         {
-            GenerateEmptyInputField();
+          
+            for (int z = data.competitorList.Count-1; z > i; z--)
+            {
+               
+                if(data.competitorList[z].CompetitorName == data.competitorList[i].CompetitorName)
+                {
+                    if(GetCompetitorTotalScore(z) == 0) {
+                    
+                    data.competitorList.RemoveAt(z);}
+                }
+            }
         }
-        }
+    }
 
     public void GenerateEmptyInputField()
     {
@@ -167,7 +189,10 @@ public class CompetitionManager : MonoBehaviour
 
     public  void GenerateInputField(TMP_InputField input)
     { 
+        // if (input.text == lastName) {return;}
+        //     lastName  = input.text;
         Names.Add(input);
+   
         GenerateEmptyInputField();
         
 
@@ -181,24 +206,30 @@ public class CompetitionManager : MonoBehaviour
     {
           if (AppManager.instance.SelectedFile != "None")
         {
+           
          if(NoOfTargets > data.Targets)
             {
                 confirmMessage.text = "Are you sure you want to increase the number of targets to " + NoOfTargets + "?";
+                confirmingTargets = true;
                 DisplayConfirmation();
             }
         if(NoOfTargets < data.Targets)
             {
                 confirmMessage.text = "Are you sure you want to decrease the number of targets to " + NoOfTargets + "? This may result in a loss of data.";
+                 confirmingTargets = true;
                 DisplayConfirmation();
             }
             
            if(NoOfTargets == data.Targets) {
+            confirmingTargets = false;
             CheckNames();
-            LoadScene(2);
+            
             }
          
 
          } else {
+           
+             if( !nameEdited) {return;} //no competitor list
            string today = DateTime.Now.Day.ToString() +  "-"  + DateTime.Now.Month.ToString() + "-"  + DateTime.Now.Year.ToString();
             AppManager.instance.SelectedFile = today;   
         competitionDate = DateTime.Now.Day.ToString() + "/"  + DateTime.Now.Month.ToString() + "/" + DateTime.Now.Year.ToString();
@@ -249,14 +280,20 @@ public class CompetitionManager : MonoBehaviour
 
     public void CancelAction()
     {
-        NoOfTargets  = data.Targets;
-        slider.value = (float)NoOfTargets;
-         modalPanel.SetActive(false);
-         CheckNames();
+        modalPanel.SetActive(false);
+        if(confirmingTargets) {
+            NoOfTargets  = data.Targets;
+            slider.value = (float)NoOfTargets;
+            
+            confirmingTargets = false;
+            CheckNames();
+        } else {
          LoadScene(2);
+        }
     }
     public void AmendNoOfTargets()
-    {
+    { if(!confirmingTargets) {EditNames(); return;}
+        confirmingTargets = false;
         if(NoOfTargets > data.Targets) {
          
             foreach (var competitor in data.competitorList)
@@ -271,16 +308,16 @@ public class CompetitionManager : MonoBehaviour
             
             
         } else if(NoOfTargets < data.Targets) {
-            print("Targets <");
+       
             foreach (var competitor in data.competitorList)
             {
-                print("competitor");
-               print(data.Targets-1 + " " + NoOfTargets);
+               
+             
                 for (int i = data.Targets-1; i > NoOfTargets-1
                 
                 ; i--)
                 {
-                   print(competitor.scores[i] + " " +i);
+      
                     competitor.scores.RemoveAt(i);
                    
                 }
@@ -289,7 +326,7 @@ public class CompetitionManager : MonoBehaviour
         data.Targets = NoOfTargets;     
         modalPanel.SetActive(false);
         CheckNames();
-        LoadScene(2);
+        
     }
 
     public void NameEdited()
@@ -298,14 +335,23 @@ public class CompetitionManager : MonoBehaviour
        
     }
     void CheckNames() {
-        if( !nameEdited) return;
-        nameEdited = false;
+        
+        if( !nameEdited) {
            
+            LoadScene(2); 
+             return;}
+        confirmMessage.text = "Are you sure you want to update the list of competitors?";
+        DisplayConfirmation();
+    }
+    void EditNames() {
+        nameEdited = false;
+        modalPanel.SetActive(false); 
         List<int> deletedNames = new List<int>();
 
         for (int i = 0; i < data.competitorList.Count; i++)
 
         {                   
+
 
             if(data.competitorList[i].CompetitorName != Names[i+1].text.ToString())
             {
@@ -321,17 +367,20 @@ public class CompetitionManager : MonoBehaviour
                 }
             }
         }
-            if(Names.Count-1 > data.competitorList.Count )
+           
+            if(Names.Count > data.competitorList.Count )
             {
-                for (int j = data.competitorList.Count+1; j < Names.Count-1; j++)
+              
+                for (int j = data.competitorList.Count+1; j < Names.Count; j++)
                 {
-                    if(Names[j+1].text.ToString() != "")
+                    
+                    if(Names[j].text.ToString() != "")
                     {
                  
                         CompetitorList addedCompetitor = new CompetitorList();
                        
                        
-                        addedCompetitor.CompetitorName = Names[j+1].text.ToString();;
+                        addedCompetitor.CompetitorName = Names[j].text.ToString();;
                       
                         List<int> emptyScores = new List<int>();
                         for (int x = 0; x < NoOfTargets; x++)
@@ -344,7 +393,8 @@ public class CompetitionManager : MonoBehaviour
                 }
                 if (deletedNames.Count > 0)
             {
-                for (int z = 0; z < deletedNames.Count; z++)
+
+                for (int z = deletedNames.Count-1; z >= 0; z--)
                 {
                     data.competitorList.RemoveAt(deletedNames[z]);
                 }
@@ -358,13 +408,19 @@ public class CompetitionManager : MonoBehaviour
         
             }
         
-
+        LoadScene(2);
 
     }
 
-    public void Save(ref CompetitionSaveData saveData)
+    public bool Save(ref CompetitionSaveData saveData)
     {
+        if (data.competitorList.Count <1)
+        {
+            return false;
+        } else {
         saveData = data;
+        return true;
+        }
   
       
     }

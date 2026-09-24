@@ -3,7 +3,7 @@ using System.IO;
 
 using System;
 using System.Collections.Generic;
-using UnityEngine.InputSystem.Interactions;
+
 
 public class SaveSystem
 {
@@ -31,16 +31,17 @@ public class SaveSystem
     }
 
     public static void Save(){
-      HandleSaveData(); 
+      if(HandleSaveData()){ 
 
 
-      File.WriteAllText(SaveFilename(),JsonUtility.ToJson(saveData,true));
+      File.WriteAllText(SaveFilename(),JsonUtility.ToJson(saveData,true));}
     }
-    private static void HandleSaveData(){
+    private static bool HandleSaveData(){
   
       
       
-    CompetitionManager.instance.Save(ref saveData.competitionSaveData);
+    bool isComplete = CompetitionManager.instance.Save(ref saveData.competitionSaveData);
+    return isComplete;
 
     }
     public static List<string> ListFiles()
@@ -85,17 +86,6 @@ public class SaveSystem
         File.Delete (Application.persistentDataPath + "/"  + filename + ".SAVE");
     }
 
-    // public static void SaveArchive(String filename){  
-     
-    //     string saveContent = File.ReadAllText(SaveFilename());
-       
-    //     saveData = JsonUtility.FromJson<SaveData>(saveContent);
-    // string ArchiveFilename = UnityEngine.Application.persistentDataPath + "/" + filename + ".archive";           
 
-    //   File.WriteAllText(ArchiveFilename,JsonUtility.ToJson(saveData,true));
-    //   // File.SetAttributes from System.IO readonly
-    // //   File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
-    // //         Console.WriteLine("The {0} file is now hidden.", path);
-    // }
 
 }
